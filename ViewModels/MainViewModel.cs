@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -36,8 +35,7 @@ public class MainViewModel : ViewModelBase
         get => _rootDirectory;
         set
         {
-            var cleaned = value?.Trim('"', ' ', '\t') ?? string.Empty;
-            if (SetField(ref _rootDirectory, cleaned))
+            if (SetField(ref _rootDirectory, value))
             {
                 SearchCommand.RaiseCanExecuteChanged();
             }
@@ -52,6 +50,7 @@ public class MainViewModel : ViewModelBase
             if (SetField(ref _searchTerm, value))
             {
                 SearchCommand.RaiseCanExecuteChanged();
+                ClearCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -89,6 +88,7 @@ public class MainViewModel : ViewModelBase
             {
                 SearchCommand.RaiseCanExecuteChanged();
                 CancelCommand.RaiseCanExecuteChanged();
+                ClearCommand.RaiseCanExecuteChanged();
                 SelectFolderCommand.RaiseCanExecuteChanged();
                 OnPropertyChanged(nameof(CanSearch));
             }
@@ -124,6 +124,7 @@ public class MainViewModel : ViewModelBase
 
     public RelayCommand SearchCommand { get; }
     public RelayCommand CancelCommand { get; }
+    public RelayCommand ClearCommand { get; }
     public RelayCommand SelectFolderCommand { get; }
     public RelayCommand OpenFileCommand { get; }
     public RelayCommand OpenFolderCommand { get; }
@@ -134,6 +135,7 @@ public class MainViewModel : ViewModelBase
 
         SearchCommand = new RelayCommand(async () => await ExecuteSearchAsync(), () => CanExecuteSearch());
         CancelCommand = new RelayCommand(ExecuteCancel, () => IsSearching);
+        ClearCommand = new RelayCommand(ExecuteClear, () => !IsSearching);
         SelectFolderCommand = new RelayCommand(ExecuteSelectFolder, () => !IsSearching);
         OpenFileCommand = new RelayCommand(ExecuteOpenFile, () => SelectedResult != null);
         OpenFolderCommand = new RelayCommand(ExecuteOpenFolder, () => SelectedResult != null);
@@ -149,6 +151,18 @@ public class MainViewModel : ViewModelBase
                !string.IsNullOrWhiteSpace(RootDirectory) &&
                Directory.Exists(RootDirectory) &&
                !string.IsNullOrWhiteSpace(SearchTerm);
+    }
+
+    private void ExecuteClear()
+    {
+        SearchTerm = string.Empty;
+        ExtensionFilter = "*.*";
+        MatchCase = false;
+        MatchWholeWord = false;
+        IncludeSubdirectories = true;
+        Results.Clear();
+        ResultCount = 0;
+        StatusMessage = "Pronto para buscar.";
     }
 
     private void ExecuteSelectFolder()
@@ -188,50 +202,23 @@ public class MainViewModel : ViewModelBase
             IncludeSubdirectories = IncludeSubdirectories
         };
 
-        var batch = new List<SearchResult>(128);
-        var lastFlush = Stopwatch.StartNew();
-
-        // Throttle UI updates in batches to prevent UI stutter on high-frequency matches
         var progress = new Progress<SearchResult>(result =>
         {
-            batch.Add(result);
-            ResultCount++;
-
-            if (lastFlush.ElapsedMilliseconds >= 50 || batch.Count >= 100)
-            {
-                foreach (var item in batch)
-                {
-                    Results.Add(item);
-                }
-                batch.Clear();
-                lastFlush.Restart();
-                StatusMessage = $"Buscando... {ResultCount:N0} ocorrência(s) encontrada(s)";
-            }
+            Results.Add(result);
+            ResultCount = Results.Count;
+            StatusMessage = $"Buscando... {ResultCount} ocorrência(s) encontrada(s)";
         });
 
         try
         {
             await _searchEngine.SearchAsync(options, progress, _cts.Token);
-
-            foreach (var item in batch)
-            {
-                Results.Add(item);
-            }
-            batch.Clear();
-
             stopwatch.Stop();
-            StatusMessage = $"Concluído em {stopwatch.Elapsed.TotalSeconds:F2}s — {ResultCount:N0} resultado(s) encontrado(s).";
+            StatusMessage = $"Concluído em {stopwatch.Elapsed.TotalSeconds:F2}s — {ResultCount} resultado(s) encontrado(s).";
         }
         catch (OperationCanceledException)
         {
-            foreach (var item in batch)
-            {
-                Results.Add(item);
-            }
-            batch.Clear();
-
             stopwatch.Stop();
-            StatusMessage = $"Busca cancelada em {stopwatch.Elapsed.TotalSeconds:F2}s ({ResultCount:N0} resultado(s)).";
+            StatusMessage = $"Busca cancelada pelo usuário em {stopwatch.Elapsed.TotalSeconds:F2}s ({ResultCount} resultado(s)).";
         }
         catch (Exception ex)
         {
@@ -240,7 +227,7 @@ public class MainViewModel : ViewModelBase
         }
         finally
         {
-            _cts?.Dispose();
+            _cts.Dispose();
             _cts = null;
             IsSearching = false;
         }
@@ -276,28 +263,17 @@ public class MainViewModel : ViewModelBase
 
     private void ExecuteOpenFolder()
     {
-        if (SelectedResult == null)
+        if (SelectedResult == null || !Directory.Exists(SelectedResult.DirectoryPath))
             return;
 
         try
         {
-            if (File.Exists(SelectedResult.FilePath))
+            Process.Start(new ProcessStartInfo
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = "explorer.exe",
-                    Arguments = $"/select,\"{SelectedResult.FilePath}\"",
-                    UseShellExecute = true
-                });
-            }
-            else if (Directory.Exists(SelectedResult.DirectoryPath))
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = SelectedResult.DirectoryPath,
-                    UseShellExecute = true
-                });
-            }
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{SelectedResult.FilePath}\"",
+                UseShellExecute = true
+            });
         }
         catch (Exception ex)
         {

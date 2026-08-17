@@ -5,12 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:CoreSearch.ViewModels"
         mc:Ignorable="d"
-        Title="CoreSearch — Busca Rápida de Arquivos e Textos"
-        Height="720" Width="1050"
-        MinHeight="550" MinWidth="800"
+        Title="Core Search"
+        Icon="app.ico"
+        Height="700" Width="1000"
+        MinHeight="550" MinWidth="780"
         WindowStartupLocation="CenterScreen"
-        Background="#F4F6F9"
-        FontFamily="Segoe UI, Segoe UI Variable, sans-serif"
+        Background="#FAFAFA"
+        FontFamily="Segoe UI, Segoe UI Variable, system-ui, sans-serif"
         FontSize="13">
 
     <Window.DataContext>
@@ -20,48 +21,19 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
+        <!-- Botão Primário (Buscar) -->
         <Style x:Key="PrimaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#2563EB" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Padding" Value="16,8" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                CornerRadius="6"
-                                Padding="{TemplateBinding Padding}"
-                                SnapsToDevicePixels="True">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1D4ED8" />
-                </Trigger>
-                <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#94A3B8" />
-                    <Setter Property="Cursor" Value="Arrow" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#E2E8F0" />
-            <Setter Property="Foreground" Value="#1E293B" />
+            <Setter Property="Background" Value="#18181B" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
             <Setter Property="FontWeight" Value="Medium" />
-            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="Padding" Value="16,6" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                                CornerRadius="6"
+                                CornerRadius="5"
                                 Padding="{TemplateBinding Padding}"
                                 SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -71,28 +43,65 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#CBD5E1" />
+                    <Setter Property="Background" Value="#27272A" />
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#F1F5F9" />
-                    <Setter Property="Foreground" Value="#94A3B8" />
+                    <Setter Property="Background" Value="#E4E4E7" />
+                    <Setter Property="Foreground" Value="#A1A1AA" />
                     <Setter Property="Cursor" Value="Arrow" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
+        <!-- Botão Secundário / Outline (Selecionar Pasta / Limpar) -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#27272A" />
+            <Setter Property="BorderBrush" Value="#E4E4E7" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F4F4F5" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#FAFAFA" />
+                    <Setter Property="Foreground" Value="#D4D4D8" />
+                    <Setter Property="BorderBrush" Value="#F4F4F5" />
+                    <Setter Property="Cursor" Value="Arrow" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Botão Cancelar -->
         <Style x:Key="DangerButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#DC2626" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="Background" Value="#EF4444" />
+            <Setter Property="Foreground" Value="#FFFFFF" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,5" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border Background="{TemplateBinding Background}"
-                                CornerRadius="6"
+                                CornerRadius="5"
                                 Padding="{TemplateBinding Padding}"
                                 SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -102,144 +111,147 @@
             </Setter>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#B91C1C" />
+                    <Setter Property="Background" Value="#DC2626" />
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
-                    <Setter Property="Background" Value="#FCA5A5" />
+                    <Setter Property="Background" Value="#FEE2E2" />
+                    <Setter Property="Foreground" Value="#FCA5A5" />
                     <Setter Property="Cursor" Value="Arrow" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
+        <!-- Estilo de Input -->
         <Style TargetType="TextBox">
             <Setter Property="Padding" Value="8,6" />
-            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderBrush" Value="#E4E4E7" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Background" Value="White" />
+            <Setter Property="Background" Value="#FFFFFF" />
+            <Setter Property="Foreground" Value="#18181B" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
+        <!-- Checkbox Estilizado -->
         <Style TargetType="CheckBox">
             <Setter Property="Margin" Value="0,0,16,0" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Foreground" Value="#334155" />
+            <Setter Property="Foreground" Value="#52525B" />
         </Style>
     </Window.Resources>
 
-    <Grid Margin="20">
+    <Grid Margin="24">
         <Grid.RowDefinitions>
+            <!-- Header -->
             <RowDefinition Height="Auto" />
+            <!-- Inputs Card -->
             <RowDefinition Height="Auto" />
+            <!-- DataGrid -->
             <RowDefinition Height="*" />
+            <!-- Footer Status -->
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="🔍 CoreSearch" FontSize="20" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center" />
-                <Border Background="#DBEAFE" CornerRadius="4" Margin="12,0,0,0" Padding="8,2" VerticalAlignment="Center">
-                    <TextBlock Text=".NET 8 • High Performance" FontSize="11" FontWeight="SemiBold" Foreground="#1E40AF" />
-                </Border>
-            </StackPanel>
-        </Grid>
+        <!-- HEADER MINIMALISTA COM LOGO DA APLICAÇÃO -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+            <Border Background="#18181B" CornerRadius="6" Width="26" Height="26" Margin="0,0,10,0" VerticalAlignment="Center">
+                <Path Data="M 15.5,14 h -0.79 l -0.28,-0.27 C 15.41,12.59 16,11.11 16,9.5 C 16,5.91 13.09,3 9.5,3 C 5.91,3 3,5.91 3,9.5 C 3,13.09 5.91,16 9.5,16 c 1.61,0 3.09,-0.59 4.23,-1.57 l 0.27,0.28 v 0.79 l 5,4.99 L 20.49,19 l -4.99,-5 Z M 9.5,14 C 7.01,14 5,11.99 5,9.5 C 5,7.01 7.01,5 9.5,5 C 11.99,5 14,7.01 14,9.5 C 14,11.99 11.99,14 9.5,14 Z"
+                      Fill="#FFFFFF" Stretch="Uniform" Width="14" Height="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <TextBlock Text="Core Search" FontSize="16" FontWeight="SemiBold" Foreground="#18181B" VerticalAlignment="Center" />
+        </StackPanel>
 
-        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="18" Margin="0,0,0,16"
-                BorderBrush="#E2E8F0" BorderThickness="1">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0" Margin="0,0,0,12">
+        <!-- PAINEL DE BUSCA -->
+        <Border Grid.Row="1" Background="#FFFFFF" CornerRadius="8" Padding="16" Margin="0,0,0,16"
+                BorderBrush="#E4E4E7" BorderThickness="1">
+            <StackPanel>
+                <!-- Linha 1: Pasta Alvo -->
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="85" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-
-                    <TextBlock Text="Pasta Alvo:" FontWeight="Medium" Foreground="#334155"
-                               VerticalAlignment="Center" Width="95" />
+                    <TextBlock Text="Pasta Alvo" Foreground="#71717A" VerticalAlignment="Center" FontWeight="Medium" />
                     <TextBox Grid.Column="1" Text="{Binding RootDirectory, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,8,0" IsEnabled="{Binding CanSearch}">
-                        <TextBox.InputBindings>
-                            <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
-                        </TextBox.InputBindings>
-                    </TextBox>
-                    <Button Grid.Column="2" Content="Selecionar Pasta..."
-                            Style="{StaticResource SecondaryButtonStyle}"
+                             Margin="0,0,8,0" IsEnabled="{Binding CanSearch}" />
+                    <Button Grid.Column="2" Content="Procurar..." Style="{StaticResource SecondaryButtonStyle}"
                             Command="{Binding SelectFolderCommand}" />
                 </Grid>
 
-                <Grid Grid.Row="1" Margin="0,0,0,12">
+                <!-- Linha 2: Termo de Busca & Extensões -->
+                <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="85" />
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="160" />
+                        <ColumnDefinition Width="80" />
+                        <ColumnDefinition Width="140" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Buscar Texto:" FontWeight="Medium" Foreground="#334155"
-                               VerticalAlignment="Center" Width="95" />
+                    <TextBlock Text="Texto" Foreground="#71717A" VerticalAlignment="Center" FontWeight="Medium" />
                     <TextBox Grid.Column="1" Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,16,0" IsEnabled="{Binding CanSearch}">
+                             Margin="0,0,12,0" IsEnabled="{Binding CanSearch}">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
                         </TextBox.InputBindings>
                     </TextBox>
 
-                    <TextBlock Grid.Column="2" Text="Extensões:" FontWeight="Medium" Foreground="#334155"
-                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock Grid.Column="2" Text="Filtro" Foreground="#71717A" VerticalAlignment="Center"
+                               HorizontalAlignment="Right" Margin="0,0,8,0" FontWeight="Medium" />
                     <TextBox Grid.Column="3" Text="{Binding ExtensionFilter, UpdateSourceTrigger=PropertyChanged}"
-                             ToolTip="Exemplos: *.* | *.cs;*.txt | *.log" IsEnabled="{Binding CanSearch}">
-                        <TextBox.InputBindings>
-                            <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
-                        </TextBox.InputBindings>
-                    </TextBox>
+                             ToolTip="Ex: *.* | *.cs;*.txt" IsEnabled="{Binding CanSearch}" />
                 </Grid>
 
-                <Grid Grid.Row="2">
+                <!-- Linha 3: Opções & Ações -->
+                <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="Opções:" FontWeight="Medium" Foreground="#334155"
-                               VerticalAlignment="Center" Width="95" />
-
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                        <CheckBox Content="Diferenciar Maiúsculas/Minúsculas (Case Sensitive)"
-                                  IsChecked="{Binding MatchCase}" IsEnabled="{Binding CanSearch}" />
-                        <CheckBox Content="Palavra Inteira"
-                                  IsChecked="{Binding MatchWholeWord}" IsEnabled="{Binding CanSearch}" />
-                        <CheckBox Content="Incluir Subpastas"
-                                  IsChecked="{Binding IncludeSubdirectories}" IsEnabled="{Binding CanSearch}" />
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <CheckBox Content="Maiúsculas/Minúsculas" IsChecked="{Binding MatchCase}" IsEnabled="{Binding CanSearch}" />
+                        <CheckBox Content="Palavra inteira" IsChecked="{Binding MatchWholeWord}" IsEnabled="{Binding CanSearch}" />
+                        <CheckBox Content="Subpastas" IsChecked="{Binding IncludeSubdirectories}" IsEnabled="{Binding CanSearch}" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="2" Orientation="Horizontal">
-                        <Button Content="Buscar" Style="{StaticResource PrimaryButtonStyle}"
-                                Command="{Binding SearchCommand}" Width="100" Margin="0,0,8,0" />
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Content="Limpar" Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding ClearCommand}" Margin="0,0,8,0" />
                         <Button Content="Cancelar" Style="{StaticResource DangerButtonStyle}"
-                                Command="{Binding CancelCommand}" Width="100" />
+                                Command="{Binding CancelCommand}" Margin="0,0,8,0" Width="75" />
+                        <Button Content="Buscar" Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding SearchCommand}" Width="85" />
                     </StackPanel>
                 </Grid>
-            </Grid>
+            </StackPanel>
         </Border>
 
-        <Border Grid.Row="2" Background="White" CornerRadius="8"
-                BorderBrush="#E2E8F0" BorderThickness="1" ClipToBounds="True">
+        <!-- RESULTADOS DATAGRID -->
+        <Border Grid.Row="2" Background="#FFFFFF" CornerRadius="8"
+                BorderBrush="#E4E4E7" BorderThickness="1" ClipToBounds="True">
             <DataGrid ItemsSource="{Binding Results}"
                       SelectedItem="{Binding SelectedResult}"
                       AutoGenerateColumns="False"
                       IsReadOnly="True"
                       GridLinesVisibility="Horizontal"
-                      HorizontalGridLinesBrush="#F1F5F9"
-                      RowBackground="White"
+                      HorizontalGridLinesBrush="#F4F4F5"
+                      RowBackground="#FFFFFF"
                       AlternatingRowBackground="#FAFAFA"
                       BorderThickness="0"
-                      Background="White"
+                      Background="#FFFFFF"
                       HeadersVisibility="Column"
                       SelectionMode="Single"
                       SelectionUnit="FullRow"
@@ -247,9 +259,6 @@
                       CanUserResizeColumns="True"
                       CanUserSortColumns="True"
                       MouseDoubleClick="DataGrid_MouseDoubleClick">
-                <DataGrid.InputBindings>
-                    <KeyBinding Key="Enter" Command="{Binding OpenFileCommand}" />
-                </DataGrid.InputBindings>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Abrir Arquivo" Command="{Binding OpenFileCommand}" />
@@ -258,48 +267,50 @@
                 </DataGrid.ContextMenu>
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="Background" Value="#F8FAFC" />
-                        <Setter Property="Foreground" Value="#475569" />
-                        <Setter Property="FontWeight" Value="SemiBold" />
-                        <Setter Property="Padding" Value="10,8" />
-                        <Setter Property="BorderThickness" Value="0,0,1,1" />
-                        <Setter Property="BorderBrush" Value="#E2E8F0" />
+                        <Setter Property="Background" Value="#FAFAFA" />
+                        <Setter Property="Foreground" Value="#71717A" />
+                        <Setter Property="FontWeight" Value="Medium" />
+                        <Setter Property="Padding" Value="12,10" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Setter Property="BorderBrush" Value="#E4E4E7" />
                     </Style>
                 </DataGrid.ColumnHeaderStyle>
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
-                        <Setter Property="Height" Value="28" />
+                        <Setter Property="Height" Value="30" />
                         <Setter Property="VerticalContentAlignment" Value="Center" />
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#EFF6FF" />
+                                <Setter Property="Background" Value="#F4F4F5" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#DBEAFE" />
-                                <Setter Property="Foreground" Value="#1E3A8A" />
+                                <Setter Property="Background" Value="#E4E4E7" />
+                                <Setter Property="Foreground" Value="#18181B" />
                             </Trigger>
                         </Style.Triggers>
                     </Style>
                 </DataGrid.RowStyle>
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Arquivo" Binding="{Binding FileName}" Width="180" FontWeight="Medium" />
-                    <DataGridTextColumn Header="Linha" Binding="{Binding LineNumber}" Width="65" />
-                    <DataGridTextColumn Header="Trecho do Texto" Binding="{Binding LineContent}" Width="3*" />
-                    <DataGridTextColumn Header="Caminho da Pasta" Binding="{Binding DirectoryPath}" Width="2*" Foreground="#64748B" />
+                    <DataGridTextColumn Header="Linha" Binding="{Binding LineNumber}" Width="60" />
+                    <DataGridTextColumn Header="Trecho" Binding="{Binding LineContent}" Width="3*" />
+                    <DataGridTextColumn Header="Caminho" Binding="{Binding DirectoryPath}" Width="2*" Foreground="#A1A1AA" />
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
 
+        <!-- FOOTER STATUS -->
         <Grid Grid.Row="3" Margin="0,12,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <ProgressBar Grid.Row="0" Height="4" Margin="0,0,0,8"
+            <!-- Barra de Progresso Fina -->
+            <ProgressBar Grid.Row="0" Height="2" Margin="0,0,0,8"
                          IsIndeterminate="{Binding IsSearching}"
                          Visibility="{Binding IsSearching, Converter={StaticResource BoolToVis}}"
-                         Foreground="#2563EB" Background="#E2E8F0" BorderThickness="0" />
+                         Foreground="#18181B" Background="#E4E4E7" BorderThickness="0" />
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -307,15 +318,12 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="#475569"
-                           VerticalAlignment="Center" />
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="#71717A" VerticalAlignment="Center" FontSize="12" />
 
-                <Border Grid.Column="1" Background="#F1F5F9" CornerRadius="4" Padding="8,4">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Ocorrências: " Foreground="#64748B" FontWeight="Medium" />
-                        <TextBlock Text="{Binding ResultCount}" Foreground="#0F172A" FontWeight="Bold" />
-                    </StackPanel>
-                </Border>
+                <TextBlock Grid.Column="1" Foreground="#71717A" VerticalAlignment="Center" FontSize="12">
+                    <Run Text="Resultados: " />
+                    <Run Text="{Binding ResultCount}" FontWeight="SemiBold" Foreground="#18181B" />
+                </TextBlock>
             </Grid>
         </Grid>
     </Grid>
