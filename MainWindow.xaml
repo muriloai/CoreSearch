@@ -3,206 +3,320 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CoreSearch"
+        xmlns:viewModels="clr-namespace:CoreSearch.ViewModels"
         mc:Ignorable="d"
-        Title="CoreSearch" Height="650" Width="1000"
+        Title="CoreSearch — Busca Rápida de Arquivos e Textos"
+        Height="720" Width="1050"
+        MinHeight="550" MinWidth="800"
         WindowStartupLocation="CenterScreen"
-        Background="#18181B" Foreground="#F4F4F5"
-        FontFamily="Segoe UI">
+        Background="#F4F6F9"
+        FontFamily="Segoe UI, Segoe UI Variable, sans-serif"
+        FontSize="13">
+
+    <Window.DataContext>
+        <viewModels:MainViewModel />
+    </Window.DataContext>
 
     <Window.Resources>
-        <local:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
-        <Style TargetType="TextBox">
-            <Setter Property="Background" Value="#27272A"/>
-            <Setter Property="Foreground" Value="#F4F4F5"/>
-            <Setter Property="BorderBrush" Value="#3F3F46"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="CaretBrush" Value="#38BDF8"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style TargetType="Button">
-            <Setter Property="Background" Value="#2563EB"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="14,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#2563EB" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="border"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="4"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1D4ED8"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="border" Property="Background" Value="#1E40AF"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="border" Property="Background" Value="#3F3F46"/>
-                                <Setter Property="Foreground" Value="#71717A"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-        </Style>
-
-        <Style TargetType="CheckBox">
-            <Setter Property="Foreground" Value="#D4D4D8"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="0,0,16,0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-
-        <Style TargetType="DataGrid">
-            <Setter Property="Background" Value="#18181B"/>
-            <Setter Property="BorderBrush" Value="#27272A"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="RowBackground" Value="#18181B"/>
-            <Setter Property="AlternatingRowBackground" Value="#1F1F23"/>
-            <Setter Property="Foreground" Value="#F4F4F5"/>
-            <Setter Property="GridLinesVisibility" Value="None"/>
-            <Setter Property="HorizontalGridLinesBrush" Value="#27272A"/>
-            <Setter Property="HeadersVisibility" Value="Column"/>
-            <Setter Property="AutoGenerateColumns" Value="False"/>
-            <Setter Property="CanUserAddRows" Value="False"/>
-            <Setter Property="IsReadOnly" Value="True"/>
-            <Setter Property="SelectionMode" Value="Single"/>
-        </Style>
-
-        <Style TargetType="DataGridColumnHeader">
-            <Setter Property="Background" Value="#27272A"/>
-            <Setter Property="Foreground" Value="#A1A1AA"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="10,8"/>
-            <Setter Property="BorderThickness" Value="0,0,1,1"/>
-            <Setter Property="BorderBrush" Value="#3F3F46"/>
-        </Style>
-
-        <Style TargetType="DataGridRow">
             <Style.Triggers>
-                <Trigger Property="IsSelected" Value="True">
-                    <Setter Property="Background" Value="#0284C7"/>
-                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1D4ED8" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#94A3B8" />
+                    <Setter Property="Cursor" Value="Arrow" />
                 </Trigger>
             </Style.Triggers>
         </Style>
 
-        <Style TargetType="DataGridCell">
-            <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="BorderThickness" Value="0"/>
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#E2E8F0" />
+            <Setter Property="Foreground" Value="#1E293B" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="DataGridCell">
-                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter VerticalAlignment="Center"/>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#CBD5E1" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#F1F5F9" />
+                    <Setter Property="Foreground" Value="#94A3B8" />
+                    <Setter Property="Cursor" Value="Arrow" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DangerButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#DC2626" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="16,8" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#B91C1C" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#FCA5A5" />
+                    <Setter Property="Cursor" Value="Arrow" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="BorderBrush" Value="#CBD5E1" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="White" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style TargetType="CheckBox">
+            <Setter Property="Margin" Value="0,0,16,0" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="#334155" />
         </Style>
     </Window.Resources>
 
-    <Grid Margin="16">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="#212124" CornerRadius="6" Padding="14" Margin="0,0,0,12" BorderBrush="#2E2E33" BorderThickness="1">
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="🔍 CoreSearch" FontSize="20" FontWeight="Bold" Foreground="#0F172A" VerticalAlignment="Center" />
+                <Border Background="#DBEAFE" CornerRadius="4" Margin="12,0,0,0" Padding="8,2" VerticalAlignment="Center">
+                    <TextBlock Text=".NET 8 • High Performance" FontSize="11" FontWeight="SemiBold" Foreground="#1E40AF" />
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="18" Margin="0,0,0,16"
+                BorderBrush="#E2E8F0" BorderThickness="1">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="120"/>
-                </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="Pasta:" VerticalAlignment="Center" Foreground="#A1A1AA" FontWeight="SemiBold"/>
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding RootDirectory, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,8"/>
-                <Button Grid.Row="0" Grid.Column="2" Content="Buscar Pasta..." Click="BrowseFolder_Click" Background="#3F3F46" Margin="0,0,0,8"/>
-
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="Termo:" VerticalAlignment="Center" Foreground="#A1A1AA" FontWeight="SemiBold"/>
-                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,8"/>
-                <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" Margin="0,0,0,8">
-                    <Button Content="Pesquisar" Command="{Binding SearchCommand}" Width="120" Height="32"/>
-                </StackPanel>
-
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Extensões:" VerticalAlignment="Center" Foreground="#A1A1AA" FontWeight="SemiBold"/>
-                <Grid Grid.Row="2" Grid.Column="1" Margin="0,0,10,0">
+                <Grid Grid.Row="0" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="130"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox Grid.Column="0" Text="{Binding ExtensionFilter, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,16,0"/>
-                    <WrapPanel Grid.Column="1" VerticalAlignment="Center">
-                        <CheckBox Content="Diferenciar Maiúsculas" IsChecked="{Binding MatchCase}"/>
-                        <CheckBox Content="Palavra Inteira" IsChecked="{Binding MatchWholeWord}"/>
-                        <CheckBox Content="Incluir Subpastas" IsChecked="{Binding IncludeSubdirectories}"/>
-                    </WrapPanel>
+
+                    <TextBlock Text="Pasta Alvo:" FontWeight="Medium" Foreground="#334155"
+                               VerticalAlignment="Center" Width="95" />
+                    <TextBox Grid.Column="1" Text="{Binding RootDirectory, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,8,0" IsEnabled="{Binding CanSearch}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <Button Grid.Column="2" Content="Selecionar Pasta..."
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Command="{Binding SelectFolderCommand}" />
                 </Grid>
 
-                <Button Grid.Row="2" Grid.Column="2" Content="Cancelar" Command="{Binding CancelCommand}" Background="#EF4444" Height="30"/>
+                <Grid Grid.Row="1" Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="160" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Buscar Texto:" FontWeight="Medium" Foreground="#334155"
+                               VerticalAlignment="Center" Width="95" />
+                    <TextBox Grid.Column="1" Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,16,0" IsEnabled="{Binding CanSearch}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+
+                    <TextBlock Grid.Column="2" Text="Extensões:" FontWeight="Medium" Foreground="#334155"
+                               VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBox Grid.Column="3" Text="{Binding ExtensionFilter, UpdateSourceTrigger=PropertyChanged}"
+                             ToolTip="Exemplos: *.* | *.cs;*.txt | *.log" IsEnabled="{Binding CanSearch}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding SearchCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Opções:" FontWeight="Medium" Foreground="#334155"
+                               VerticalAlignment="Center" Width="95" />
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <CheckBox Content="Diferenciar Maiúsculas/Minúsculas (Case Sensitive)"
+                                  IsChecked="{Binding MatchCase}" IsEnabled="{Binding CanSearch}" />
+                        <CheckBox Content="Palavra Inteira"
+                                  IsChecked="{Binding MatchWholeWord}" IsEnabled="{Binding CanSearch}" />
+                        <CheckBox Content="Incluir Subpastas"
+                                  IsChecked="{Binding IncludeSubdirectories}" IsEnabled="{Binding CanSearch}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button Content="Buscar" Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding SearchCommand}" Width="100" Margin="0,0,8,0" />
+                        <Button Content="Cancelar" Style="{StaticResource DangerButtonStyle}"
+                                Command="{Binding CancelCommand}" Width="100" />
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Border>
 
-        <DockPanel Grid.Row="1" Margin="0,0,0,8">
-            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
-                <Button Content="Abrir Arquivo" Command="{Binding OpenFileCommand}" Background="#3F3F46" Margin="0,0,8,0" Padding="10,4"/>
-                <Button Content="Abrir na Pasta" Command="{Binding OpenFolderCommand}" Background="#3F3F46" Padding="10,4"/>
-            </StackPanel>
-            <TextBlock Text="Resultados:" VerticalAlignment="Center" Foreground="#A1A1AA" FontWeight="SemiBold"/>
-        </DockPanel>
+        <Border Grid.Row="2" Background="White" CornerRadius="8"
+                BorderBrush="#E2E8F0" BorderThickness="1" ClipToBounds="True">
+            <DataGrid ItemsSource="{Binding Results}"
+                      SelectedItem="{Binding SelectedResult}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#F1F5F9"
+                      RowBackground="White"
+                      AlternatingRowBackground="#FAFAFA"
+                      BorderThickness="0"
+                      Background="White"
+                      HeadersVisibility="Column"
+                      SelectionMode="Single"
+                      SelectionUnit="FullRow"
+                      CanUserReorderColumns="True"
+                      CanUserResizeColumns="True"
+                      CanUserSortColumns="True"
+                      MouseDoubleClick="DataGrid_MouseDoubleClick">
+                <DataGrid.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding OpenFileCommand}" />
+                </DataGrid.InputBindings>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Abrir Arquivo" Command="{Binding OpenFileCommand}" />
+                        <MenuItem Header="Abrir Pasta no Explorer" Command="{Binding OpenFolderCommand}" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#F8FAFC" />
+                        <Setter Property="Foreground" Value="#475569" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                        <Setter Property="Padding" Value="10,8" />
+                        <Setter Property="BorderThickness" Value="0,0,1,1" />
+                        <Setter Property="BorderBrush" Value="#E2E8F0" />
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Height" Value="28" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#EFF6FF" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#DBEAFE" />
+                                <Setter Property="Foreground" Value="#1E3A8A" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.RowStyle>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Arquivo" Binding="{Binding FileName}" Width="180" FontWeight="Medium" />
+                    <DataGridTextColumn Header="Linha" Binding="{Binding LineNumber}" Width="65" />
+                    <DataGridTextColumn Header="Trecho do Texto" Binding="{Binding LineContent}" Width="3*" />
+                    <DataGridTextColumn Header="Caminho da Pasta" Binding="{Binding DirectoryPath}" Width="2*" Foreground="#64748B" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
 
-        <DataGrid Grid.Row="2"
-                  ItemsSource="{Binding Results}"
-                  SelectedItem="{Binding SelectedResult}"
-                  MouseDoubleClick="DataGrid_MouseDoubleClick">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Arquivo" Binding="{Binding FileName}" Width="180"/>
-                <DataGridTextColumn Header="Linha" Binding="{Binding LineNumber}" Width="70"/>
-                <DataGridTextColumn Header="Conteúdo" Binding="{Binding LineContent}" Width="*"/>
-                <DataGridTextColumn Header="Caminho" Binding="{Binding DirectoryPath}" Width="250"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <Grid Grid.Row="3" Margin="0,12,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <Border Grid.Row="3" Background="#212124" Margin="0,8,0,0" Padding="8,6" CornerRadius="4" BorderBrush="#2E2E33" BorderThickness="1">
-            <Grid>
+            <ProgressBar Grid.Row="0" Height="4" Margin="0,0,0,8"
+                         IsIndeterminate="{Binding IsSearching}"
+                         Visibility="{Binding IsSearching, Converter={StaticResource BoolToVis}}"
+                         Foreground="#2563EB" Background="#E2E8F0" BorderThickness="0" />
+
+            <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="#A1A1AA" VerticalAlignment="Center"/>
-                <ProgressBar Grid.Column="1" IsIndeterminate="{Binding IsSearching}" Width="120" Height="12" Margin="10,0,0,0"
-                             Visibility="{Binding IsSearching, Converter={StaticResource BoolToVisibility}}"/>
+
+                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="#475569"
+                           VerticalAlignment="Center" />
+
+                <Border Grid.Column="1" Background="#F1F5F9" CornerRadius="4" Padding="8,4">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Ocorrências: " Foreground="#64748B" FontWeight="Medium" />
+                        <TextBlock Text="{Binding ResultCount}" Foreground="#0F172A" FontWeight="Bold" />
+                    </StackPanel>
+                </Border>
             </Grid>
-        </Border>
+        </Grid>
     </Grid>
 </Window>

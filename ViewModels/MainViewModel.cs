@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using System.Windows;
 using CoreSearch.Models;
 using CoreSearch.Services;
+using Microsoft.Win32;
 
 namespace CoreSearch.ViewModels;
 
@@ -23,18 +25,9 @@ public class MainViewModel : ViewModelBase
     private bool _includeSubdirectories = true;
 
     private bool _isSearching;
-    private string _statusMessage = "Pronto";
+    private string _statusMessage = "Pronto para buscar.";
+    private int _resultCount;
     private SearchResult? _selectedResult;
-
-    public MainViewModel(ISearchEngine searchEngine)
-    {
-        _searchEngine = searchEngine;
-
-        SearchCommand = new RelayCommand(async () => await ExecuteSearchAsync(), () => !IsSearching && !string.IsNullOrWhiteSpace(SearchTerm) && !string.IsNullOrWhiteSpace(RootDirectory));
-        CancelCommand = new RelayCommand(CancelSearch, () => IsSearching);
-        OpenFileCommand = new RelayCommand(OpenFile, () => SelectedResult != null);
-        OpenFolderCommand = new RelayCommand(OpenFolder, () => SelectedResult != null);
-    }
 
     public ObservableCollection<SearchResult> Results { get; } = new();
 
@@ -43,8 +36,11 @@ public class MainViewModel : ViewModelBase
         get => _rootDirectory;
         set
         {
-            if (SetField(ref _rootDirectory, value))
-                ((RelayCommand)SearchCommand).RaiseCanExecuteChanged();
+            var cleaned = value?.Trim('"', ' ', '\t') ?? string.Empty;
+            if (SetField(ref _rootDirectory, cleaned))
+            {
+                SearchCommand.RaiseCanExecuteChanged();
+            }
         }
     }
 
@@ -54,7 +50,9 @@ public class MainViewModel : ViewModelBase
         set
         {
             if (SetField(ref _searchTerm, value))
-                ((RelayCommand)SearchCommand).RaiseCanExecuteChanged();
+            {
+                SearchCommand.RaiseCanExecuteChanged();
+            }
         }
     }
 
@@ -85,20 +83,30 @@ public class MainViewModel : ViewModelBase
     public bool IsSearching
     {
         get => _isSearching;
-        set
+        private set
         {
             if (SetField(ref _isSearching, value))
             {
-                ((RelayCommand)SearchCommand).RaiseCanExecuteChanged();
-                ((RelayCommand)CancelCommand).RaiseCanExecuteChanged();
+                SearchCommand.RaiseCanExecuteChanged();
+                CancelCommand.RaiseCanExecuteChanged();
+                SelectFolderCommand.RaiseCanExecuteChanged();
+                OnPropertyChanged(nameof(CanSearch));
             }
         }
     }
+
+    public bool CanSearch => !IsSearching;
 
     public string StatusMessage
     {
         get => _statusMessage;
         set => SetField(ref _statusMessage, value);
+    }
+
+    public int ResultCount
+    {
+        get => _resultCount;
+        set => SetField(ref _resultCount, value);
     }
 
     public SearchResult? SelectedResult
@@ -108,25 +116,67 @@ public class MainViewModel : ViewModelBase
         {
             if (SetField(ref _selectedResult, value))
             {
-                ((RelayCommand)OpenFileCommand).RaiseCanExecuteChanged();
-                ((RelayCommand)OpenFolderCommand).RaiseCanExecuteChanged();
+                OpenFileCommand.RaiseCanExecuteChanged();
+                OpenFolderCommand.RaiseCanExecuteChanged();
             }
         }
     }
 
-    public ICommand SearchCommand { get; }
-    public ICommand CancelCommand { get; }
-    public ICommand OpenFileCommand { get; }
-    public ICommand OpenFolderCommand { get; }
+    public RelayCommand SearchCommand { get; }
+    public RelayCommand CancelCommand { get; }
+    public RelayCommand SelectFolderCommand { get; }
+    public RelayCommand OpenFileCommand { get; }
+    public RelayCommand OpenFolderCommand { get; }
+
+    public MainViewModel(ISearchEngine searchEngine)
+    {
+        _searchEngine = searchEngine ?? throw new ArgumentNullException(nameof(searchEngine));
+
+        SearchCommand = new RelayCommand(async () => await ExecuteSearchAsync(), () => CanExecuteSearch());
+        CancelCommand = new RelayCommand(ExecuteCancel, () => IsSearching);
+        SelectFolderCommand = new RelayCommand(ExecuteSelectFolder, () => !IsSearching);
+        OpenFileCommand = new RelayCommand(ExecuteOpenFile, () => SelectedResult != null);
+        OpenFolderCommand = new RelayCommand(ExecuteOpenFolder, () => SelectedResult != null);
+    }
+
+    public MainViewModel() : this(new SearchEngine())
+    {
+    }
+
+    private bool CanExecuteSearch()
+    {
+        return !IsSearching &&
+               !string.IsNullOrWhiteSpace(RootDirectory) &&
+               Directory.Exists(RootDirectory) &&
+               !string.IsNullOrWhiteSpace(SearchTerm);
+    }
+
+    private void ExecuteSelectFolder()
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Title = "Selecionar pasta para pesquisa",
+            InitialDirectory = Directory.Exists(RootDirectory) ? RootDirectory : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            RootDirectory = dialog.FolderName;
+        }
+    }
 
     private async Task ExecuteSearchAsync()
     {
-        if (IsSearching) return;
+        if (!CanExecuteSearch())
+            return;
 
-        Results.Clear();
         IsSearching = true;
-        StatusMessage = "Buscando...";
+        Results.Clear();
+        ResultCount = 0;
+        StatusMessage = "Buscando ocorrências...";
+
         _cts = new CancellationTokenSource();
+        var stopwatch = Stopwatch.StartNew();
 
         var options = new SearchOptions
         {
@@ -138,45 +188,77 @@ public class MainViewModel : ViewModelBase
             IncludeSubdirectories = IncludeSubdirectories
         };
 
+        var batch = new List<SearchResult>(128);
+        var lastFlush = Stopwatch.StartNew();
+
+        // Throttle UI updates in batches to prevent UI stutter on high-frequency matches
         var progress = new Progress<SearchResult>(result =>
         {
-            Results.Add(result);
-            StatusMessage = $"{Results.Count} ocorrência(s) encontrada(s)...";
+            batch.Add(result);
+            ResultCount++;
+
+            if (lastFlush.ElapsedMilliseconds >= 50 || batch.Count >= 100)
+            {
+                foreach (var item in batch)
+                {
+                    Results.Add(item);
+                }
+                batch.Clear();
+                lastFlush.Restart();
+                StatusMessage = $"Buscando... {ResultCount:N0} ocorrência(s) encontrada(s)";
+            }
         });
 
-        var sw = Stopwatch.StartNew();
         try
         {
             await _searchEngine.SearchAsync(options, progress, _cts.Token);
-            sw.Stop();
-            StatusMessage = $"Concluído em {sw.ElapsedMilliseconds} ms ({Results.Count} resultado(s))";
+
+            foreach (var item in batch)
+            {
+                Results.Add(item);
+            }
+            batch.Clear();
+
+            stopwatch.Stop();
+            StatusMessage = $"Concluído em {stopwatch.Elapsed.TotalSeconds:F2}s — {ResultCount:N0} resultado(s) encontrado(s).";
         }
         catch (OperationCanceledException)
         {
-            sw.Stop();
-            StatusMessage = $"Cancelado ({Results.Count} resultado(s))";
+            foreach (var item in batch)
+            {
+                Results.Add(item);
+            }
+            batch.Clear();
+
+            stopwatch.Stop();
+            StatusMessage = $"Busca cancelada em {stopwatch.Elapsed.TotalSeconds:F2}s ({ResultCount:N0} resultado(s)).";
         }
         catch (Exception ex)
         {
-            sw.Stop();
-            StatusMessage = $"Erro: {ex.Message}";
+            stopwatch.Stop();
+            StatusMessage = $"Erro durante a busca: {ex.Message}";
         }
         finally
         {
-            IsSearching = false;
-            _cts.Dispose();
+            _cts?.Dispose();
             _cts = null;
+            IsSearching = false;
         }
     }
 
-    private void CancelSearch()
+    private void ExecuteCancel()
     {
-        _cts?.Cancel();
+        if (_cts != null && !_cts.IsCancellationRequested)
+        {
+            StatusMessage = "Cancelando busca...";
+            _cts.Cancel();
+        }
     }
 
-    private void OpenFile()
+    private void ExecuteOpenFile()
     {
-        if (SelectedResult == null || !File.Exists(SelectedResult.FilePath)) return;
+        if (SelectedResult == null || !File.Exists(SelectedResult.FilePath))
+            return;
 
         try
         {
@@ -186,26 +268,40 @@ public class MainViewModel : ViewModelBase
                 UseShellExecute = true
             });
         }
-        catch
+        catch (Exception ex)
         {
+            MessageBox.Show($"Não foi possível abrir o arquivo: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
-    private void OpenFolder()
+    private void ExecuteOpenFolder()
     {
-        if (SelectedResult == null || !File.Exists(SelectedResult.FilePath)) return;
+        if (SelectedResult == null)
+            return;
 
         try
         {
-            Process.Start(new ProcessStartInfo
+            if (File.Exists(SelectedResult.FilePath))
             {
-                FileName = "explorer.exe",
-                Arguments = $"/select,\"{SelectedResult.FilePath}\"",
-                UseShellExecute = true
-            });
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"/select,\"{SelectedResult.FilePath}\"",
+                    UseShellExecute = true
+                });
+            }
+            else if (Directory.Exists(SelectedResult.DirectoryPath))
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = SelectedResult.DirectoryPath,
+                    UseShellExecute = true
+                });
+            }
         }
-        catch
+        catch (Exception ex)
         {
+            MessageBox.Show($"Não foi possível abrir a pasta: {ex.Message}", "Erro", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
